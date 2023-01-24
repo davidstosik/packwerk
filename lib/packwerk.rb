@@ -101,6 +101,7 @@ module Packwerk
     module Checkers
       extend ActiveSupport::Autoload
 
+      autoload :AlwaysTrueChecker
       autoload :DependencyChecker
       autoload :PrivacyChecker
     end

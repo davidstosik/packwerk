@@ -35,7 +35,7 @@ module Packwerk
 
           source_package = context_provider.package_from_path(unresolved_reference.relative_path)
 
-          next if source_package == package_for_constant
+          #next if source_package == package_for_constant
 
           fully_qualified_references << Reference.new(
             package: source_package,

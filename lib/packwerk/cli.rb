@@ -56,6 +56,8 @@ module Packwerk
         output_result(parse_run(args).update_todo)
       when "validate"
         validate(args)
+      when "dump"
+        output_result(parse_run(args).dump)
       when nil, "help"
         usage
       else

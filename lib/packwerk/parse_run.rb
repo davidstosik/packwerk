@@ -58,6 +58,56 @@ module Packwerk
     end
 
     sig { returns(Cli::Result) }
+    def dump
+      run_context = RunContext.new(
+        root_path: @configuration.root_path,
+        load_paths: @configuration.load_paths,
+        package_paths: @configuration.package_paths,
+        inflector: ActiveSupport::Inflector,
+        custom_associations: @configuration.custom_associations,
+        cache_enabled: @configuration.cache_enabled?,
+        cache_directory: @configuration.cache_directory,
+        config_path: @configuration.config_path,
+        checkers: [ReferenceChecking::Checkers::AlwaysTrueChecker.new],
+      )
+
+      all_offenses = T.let([], T::Array[Offense])
+      process_file = T.let(->(relative_file) do
+        run_context.process_file(relative_file: relative_file).tap do |offenses|
+          #failed =  offenses.any? { |offense| !offense_collection.listed?(offense) }
+          update_progress(failed: false)
+        end
+      end, ProcessFileProc)
+
+      @progress_formatter.started_inspection(@relative_file_set) do
+        all_offenses = if @configuration.parallel?
+          Parallel.flat_map(@relative_file_set, &process_file)
+        else
+          serial_find_offenses(&process_file)
+        end
+      end
+
+      puts "count: #{all_offenses.count}"
+      CSV.open("references.csv", "w", headers: %w(package file constant constant_location constant_package), write_headers: true) do |csv|
+        all_offenses.each_slice(1000) do |offenses|
+          offenses.each do |offense|
+            next unless offense.is_a?(ReferenceOffense)
+
+            csv << {
+              "package" => offense.reference.package.name,
+              "file" => offense.file,
+              "constant" => offense.reference.constant.name,
+              "constant_location" => offense.reference.constant.location,
+              "constant_package" => offense.reference.constant.package.name,
+            }
+          end
+          csv.flush
+        end
+      end
+      Cli::Result.new(message: "done", status: true)
+    end
+
+    sig { returns(Cli::Result) }
     def check
       run_context = RunContext.from_configuration(@configuration)
       offense_collection = find_offenses(run_context, show_errors: true)
