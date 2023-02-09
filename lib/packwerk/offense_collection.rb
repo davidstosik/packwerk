@@ -117,7 +117,7 @@ module Packwerk
 
     sig { params(package: Packwerk::Package).returns(String) }
     def package_todo_file_for(package)
-      File.join(@root_path, package.name, "package_todo.yml")
+      File.join(@root_path, package.name, "deprecated_references.yml")
     end
   end
 end

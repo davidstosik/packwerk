@@ -58,6 +58,8 @@ module Packwerk
         validate(args)
       when "dump"
         output_result(parse_run(args).dump)
+      when "dump-todo"
+        output_result(parse_run(args).dump_todo)
       when nil, "help"
         usage
       else

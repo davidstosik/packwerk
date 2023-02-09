@@ -58,6 +58,34 @@ module Packwerk
     end
 
     sig { returns(Cli::Result) }
+    def dump_todo
+      require "debug"
+      run_context = RunContext.from_configuration(@configuration)
+      package_set = run_context.package_set
+      offense_collection = OffenseCollection.new(@configuration.root_path)
+
+      CSV.open("todos.csv", "w", headers: %w(type constant file), write_headers: true) do |csv|
+        package_set.each do |package|
+          offense_collection.send(:package_todo_for, package).send(:todo_list).each do |_key, offenses|
+            offenses.each do |constant, violations|
+              violations["violations"].each do |type|
+                violations["files"].each do |file|
+                  csv << {
+                    "type" => type,
+                    "constant" => constant,
+                    "file" => file
+                  }
+                end
+              end
+            end
+          end
+        end
+      end
+
+      Cli::Result.new(message: "done", status: true)
+    end
+
+    sig { returns(Cli::Result) }
     def dump
       run_context = RunContext.new(
         root_path: @configuration.root_path,
