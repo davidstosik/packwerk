@@ -12,10 +12,11 @@ module Packwerk
       sig do
         params(
           unresolved_references: T::Array[UnresolvedReference],
-          context_provider: ConstantDiscovery
+          context_provider: ConstantDiscovery,
+          include_same_package: T::Boolean,
         ).returns(T::Array[Reference])
       end
-      def get_fully_qualified_references_from(unresolved_references, context_provider)
+      def get_fully_qualified_references_from(unresolved_references, context_provider, include_same_package: false)
         fully_qualified_references = T.let([], T::Array[Reference])
 
         unresolved_references.each do |unresolved_references_or_offense|
@@ -35,7 +36,7 @@ module Packwerk
 
           source_package = context_provider.package_from_path(unresolved_reference.relative_path)
 
-          next if source_package == package_for_constant
+          next if !include_same_package && source_package == package_for_constant
 
           fully_qualified_references << Reference.new(
             package: source_package,

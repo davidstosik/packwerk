@@ -8,6 +8,7 @@ module Packwerk
 
     autoload :BaseCommand
     autoload :CheckCommand
+    autoload :DumpCommand
     autoload :HelpCommand
     autoload :InitCommand
     autoload :LazyLoadedEntry
@@ -48,6 +49,7 @@ module Packwerk
     register("check")
     register("update-todo", aliases: ["update"])
     register("validate")
+    register("dump")
     register("version")
     register("help")
   end

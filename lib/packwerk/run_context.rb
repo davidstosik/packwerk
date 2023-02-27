@@ -77,13 +77,30 @@ module Packwerk
     def process_file(relative_file:)
       processed_file = file_processor.call(relative_file)
 
-      references = ReferenceExtractor.get_fully_qualified_references_from(
-        processed_file.unresolved_references,
-        context_provider
-      )
       reference_checker = ReferenceChecking::ReferenceChecker.new(@checkers)
 
       processed_file.offenses + references.flat_map { |reference| reference_checker.call(reference) }
+    end
+
+    sig { params(relative_file: String).returns(T::Array[Reference]) }
+    def references(relative_file:)
+      processed_file = file_processor.call(relative_file)
+#
+#      @@no_package_context_provider ||= ConstantDiscovery.new(
+#        constant_resolver: resolver,
+#        packages: PackageSet.new([Package.new(name: Package::ROOT_PACKAGE_NAME, config: nil)])
+#      )
+      ReferenceExtractor.get_fully_qualified_references_from(
+        processed_file.unresolved_references,
+        #@@no_package_context_provider
+        context_provider,
+        include_same_package: true
+      )
+    end
+
+    sig { params(relative_file: String).returns(FileProcessor::ProcessedFile) }
+    def processed_file(relative_file)
+      file_processor.call(relative_file)
     end
 
     sig { returns(PackageSet) }
