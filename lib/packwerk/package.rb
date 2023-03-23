@@ -20,12 +20,12 @@ module Packwerk
     sig { returns(T::Hash[T.untyped, T.untyped]) }
     attr_reader :config
 
-    sig { params(name: String, config: T.nilable(T::Hash[String, T.untyped])).void }
-    def initialize(name:, config: nil)
+    sig { params(name: String, root_path: String, config: T.nilable(T::Hash[String, T.untyped])).void }
+    def initialize(name:, root_path:, config: nil)
       @name = name
+      @root_path = root_path
       @config = T.let(config || {}, T::Hash[String, T.untyped])
       @dependencies = T.let(Array(@config["dependencies"]).freeze, T::Array[String])
-      @public_path = T.let(nil, T.nilable(String))
     end
 
     sig { returns(T::Boolean) }
@@ -70,6 +70,18 @@ module Packwerk
     sig { returns(T::Boolean) }
     def root?
       @name == ROOT_PACKAGE_NAME
+    end
+
+    sig { returns(PackageTodo) }
+    def todo
+      PackageTodo.new(self, todo_file_path)
+    end
+
+    private
+
+    sig { returns(String) }
+    def todo_file_path
+      File.join(@root_path, name, "package_todo.yml")
     end
   end
 end

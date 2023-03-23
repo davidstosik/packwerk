@@ -26,10 +26,10 @@ module Packwerk
 
         packages = package_paths.map do |path|
           root_relative = path.dirname.relative_path_from(root_path)
-          Package.new(name: root_relative.to_s, config: YAML.load_file(path, fallback: nil))
+          Package.new(name: root_relative.to_s, config: YAML.load_file(path, fallback: nil), root_path: root_path)
         end
 
-        create_root_package_if_none_in(packages)
+        create_root_package_if_none_in(packages, root_path)
 
         new(packages)
       end
@@ -57,11 +57,11 @@ module Packwerk
 
       private
 
-      sig { params(packages: T::Array[Package]).void }
-      def create_root_package_if_none_in(packages)
+      sig { params(packages: T::Array[Package], root_path: String).void }
+      def create_root_package_if_none_in(packages, root_path)
         return if packages.any?(&:root?)
 
-        packages << Package.new(name: Package::ROOT_PACKAGE_NAME, config: nil)
+        packages << Package.new(name: Package::ROOT_PACKAGE_NAME, root_path: root_path)
       end
 
       sig { params(globs: T::Array[String], path: Pathname).returns(T::Boolean) }

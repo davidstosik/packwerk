@@ -76,6 +76,11 @@ module Packwerk
       errors + new_violations
     end
 
+    sig { returns(T::Hash[Package, PackageTodo]) }
+    def package_todos
+      @package_todo
+    end
+
     private
 
     sig { params(offense: ReferenceOffense).returns(T::Boolean) }

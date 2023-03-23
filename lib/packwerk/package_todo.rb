@@ -98,6 +98,19 @@ module Packwerk
       File.delete(@path) if File.exist?(@path)
     end
 
+    sig { returns(Integer) }
+    def count_old
+      old_entries.values.flat_map(&:values).flat_map{_1["files"]}.count
+    end
+
+    def count_new
+      new_entries.sum do |_, package_violations|
+        package_violations.sum do |_, entries_for_constant|
+          entries_for_constant.fetch("files").count
+        end
+      end
+    end
+
     private
 
     sig { returns(Entries) }

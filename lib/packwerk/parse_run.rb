@@ -58,6 +58,26 @@ module Packwerk
     end
 
     sig { returns(Cli::Result) }
+    def count_violations
+      run_context = RunContext.from_configuration(@configuration)
+
+      #package_set = PackageSet.load_all_from(@configuration.root_path)
+
+      #package_set.each do |package|
+      #  puts "#{package.name},#{package.todo.count_old}"
+      #end
+
+      offense_collection = find_offenses(run_context, show_errors: true)
+
+      offense_collection.package_todos.each do |package, package_todo|
+        puts "#{package.name},#{package_todo.count_old},#{package_todo.count_new}"
+      end
+
+
+      Cli::Result.new(message: "done", status: true)
+    end
+
+    sig { returns(Cli::Result) }
     def check
       run_context = RunContext.from_configuration(@configuration)
       offense_collection = find_offenses(run_context, show_errors: true)

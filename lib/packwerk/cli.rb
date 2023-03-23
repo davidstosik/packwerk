@@ -57,6 +57,8 @@ module Packwerk
         output_result(parse_run(args).check)
       when "update-todo", "update"
         output_result(parse_run(args).update_todo)
+      when "count-violations"
+        output_result(parse_run(args).count_violations)
       when "validate"
         validate(args)
       when "version"
